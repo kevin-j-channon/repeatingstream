@@ -12,7 +12,7 @@ class RepeatingInputSource : public boost::iostreams::source
 public:
 	RepeatingInputSource() = delete;
 
-	explicit RepeatingInputSource(Buffer_T&& buf, size_t repeat_count)
+	RepeatingInputSource(Buffer_T&& buf, size_t repeat_count)
 		: m_buf{ std::move(buf) }
 		, m_current{ repeat_count > 0 ? m_buf.cbegin() : m_buf.cend()}
 		, m_remaining_repeats{ repeat_count }
