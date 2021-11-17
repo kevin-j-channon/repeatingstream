@@ -6,7 +6,6 @@
 #include <utility>
 #include <algorithm>
 
-
 template<typename Buffer_T>
 class RepeatingInputSource : public boost::iostreams::source
 {
@@ -15,7 +14,7 @@ public:
 
 	explicit RepeatingInputSource(Buffer_T&& buf, size_t repeat_count)
 		: m_buf{ std::move(buf) }
-		, m_current{ m_buf.cbegin() }
+		, m_current{ repeat_count > 0 ? m_buf.cbegin() : m_buf.cend()}
 		, m_remaining_repeats{ repeat_count }
 	{
 	}
@@ -47,7 +46,7 @@ public:
 			auto new_s = std::copy_n(m_current, read_count, s);
 			std::advance(m_current, read_count);
 
-			_handle_any_overrun_by_wrapping(over_run);
+			read_count += _handle_any_overrun_by_wrapping(new_s, over_run);
 
 			return read_count;
 		}
@@ -57,16 +56,16 @@ public:
 	}
 
 private:
-	void _handle_any_overrun_by_wrapping(size_t over_run)
+	std::streamsize _handle_any_overrun_by_wrapping(char_type* s, std::streamsize n)
 	{
-		if (over_run <= 0) {
-			return;
+		if (n <= 0) {
+			return 0;
 		}
 
 		--m_remaining_repeats;
 		m_current = m_buf.cbegin();
 
-		read_count += this->read(new_s, over_run);
+		return this->read(s, n);
 	}
 
 	Buffer_T m_buf;
