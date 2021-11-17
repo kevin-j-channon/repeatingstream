@@ -66,5 +66,20 @@ namespace testrepeatingstream
 
 			fn(stream);
 		}
+
+		TEST_METHOD(ZeroLengthBufferReturnsZeroThings)
+		{
+			using Buffer_t = std::vector<char>;
+
+			for (auto repeat_count : { 0, 1, 2, 5, 10, 20, 50 })
+			{
+				RepeatingInputStream<Buffer_t> stream(RepeatingInputSource<Buffer_t>(Buffer_t{}, repeat_count));
+
+				auto s = std::string();
+				stream >> s;
+
+				Assert::AreEqual(std::string(""), s);
+			}
+		}
 	};
 }
